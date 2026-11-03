@@ -912,6 +912,35 @@ FTP / SFTP 服务器，和开发机环境一致最稳。
 同时往 `.tmp-tests` 里读写，实测会出现偶发假失败（同一处代码上一轮过、下一轮挂）。
 本地用 `pnpm test`（并行，快）就够，CI 用串行换确定性。
 
+### 发布到插件市场
+
+发布走 **Trusted Publishing（OIDC）**，不需要 PAT、仓库里不存任何密钥
+（Azure DevOps 的全局 PAT 会在 2026-12-01 废弃，所以直接用了联邦身份）。
+
+一次性准备：
+
+1. 在 <https://marketplace.visualstudio.com/manage> 创建发布者，把 ID 填进
+   `package.json` 的 `publisher`
+2. 在该发布者的 **Trusted Publishing** 页建一条策略：
+   `Repository owner` = 你的 GitHub 账号、`Repository` = `remote-file`、
+   `Workflow` = `publish.yml`、`Environment` 留空
+
+之后每次发版：
+
+```powershell
+# 1. 改 package.json 的 version，写 CHANGELOG
+# 2. 提交并推一个标签
+git tag v0.12.2
+git push origin main --tags
+# 3. .github/workflows/publish.yml 自动跑：
+#    typecheck → test → vsce publish --oidc
+```
+
+也可以在 Actions 页面手动 Run workflow。
+
+> `vsce` 打包前会自动执行 `vscode:prepublish`（即 `node esbuild.mjs`），
+> 所以不会出现"打进了旧 bundle"的情况。
+
 ### 测试覆盖了什么
 
 `pnpm test` 会跑 159 个用例（其中 1 个是默认跳过的性能测量）。真正起服务器、走真实协议的不在少数：

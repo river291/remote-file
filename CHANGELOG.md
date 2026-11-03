@@ -1,5 +1,28 @@
 # 更新记录
 
+## 0.12.1
+
+**正式上架 VS Code 插件市场** 🎉
+
+<https://marketplace.visualstudio.com/items?itemName=river291.remote-file>
+
+- 加 128×128 图标（`media/icon.png`）和市场列表页的横幅配色；图标可用
+  `python media/make-icon.py` 重新生成
+- `keywords` 从 6 个扩到 17 个，`displayName` / `description` 补上英文关键词，
+  提升在 Extension Marketplace 里的搜索命中
+- `publisher` 改为 `river291`（扩展 ID 从 `local.remote-file` 变成 `river291.remote-file`，
+  装新版前要先卸掉旧的）
+
+**自动发布改用 Trusted Publishing（OIDC）**
+
+Azure DevOps 的全局 PAT 将在 2026-12-01 废弃，所以发布链路直接走联邦身份，不再存任何密钥：
+
+- `@vscode/vsce` 3.9.2 → **4.1.0**（`--oidc` 需要）
+- 新增 `.github/workflows/publish.yml`：`id-token: write` + `vsce publish --oidc`，
+  推 `v*` 标签或手动触发即可发布
+- 加 `vscode:prepublish`：`vsce package` / `vsce publish` 会先自动构建，
+  不会再出现"打进了旧 bundle"的情况；`package` 脚本里的重复构建也去掉了
+
 ## 0.12.0
 
 **修：首次同步会把「远程上还没有的新文件」吞掉**
