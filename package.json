@@ -1,10 +1,15 @@
 {
   "name": "remote-file",
-  "displayName": "Remote File - FTP/SFTP 部署",
-  "description": "读取工作区 .vscode/sftp.json 配置，通过 SFTP/FTP 浏览远程文件、保存自动上传、目录映射、删除同步。",
+  "displayName": "Remote File — FTP/SFTP Deploy & Sync（部署同步）",
+  "description": "读取工作区 .vscode/sftp.json 配置，通过 SFTP/FTP/FTPS 浏览远程文件、保存自动上传、目录映射、删除同步、增量同步。Deploy a workspace over FTP / SFTP / FTPS: remote file tree, upload on save, directory mappings, incremental sync.",
   "version": "0.12.0",
-  "publisher": "local",
+  "publisher": "river291",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#0B5CA8",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/river291/remote-file.git"
@@ -24,8 +29,19 @@
     "sftp",
     "ftps",
     "deploy",
+    "deployment",
     "upload",
-    "sync"
+    "download",
+    "sync",
+    "synchronize",
+    "remote",
+    "remote-file",
+    "remote-browser",
+    "file-transfer",
+    "auto-upload",
+    "web-deploy",
+    "hosting",
+    "watch"
   ],
   "main": "./dist/extension.js",
   "extensionKind": [
@@ -517,18 +533,19 @@
   },
   "scripts": {
     "build": "node esbuild.mjs",
+    "vscode:prepublish": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit",
     "test": "node esbuild.mjs --tests && node --test-timeout=60000 --test \"out-test/*.test.js\"",
     "test:serial": "node esbuild.mjs --tests && node --test-timeout=60000 --test-concurrency=1 --test \"out-test/*.test.js\"",
-    "package": "node esbuild.mjs && vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
     "@types/ssh2-sftp-client": "^9.0.4",
     "@types/vscode": "1.95.0",
-    "@vscode/vsce": "^3.2.1",
+    "@vscode/vsce": "^4.1.0",
     "esbuild": "^0.24.2",
     "ftp-srv": "^4.6.3",
     "iconv-lite": "^0.6.3",

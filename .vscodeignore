@@ -29,6 +29,7 @@ tsconfig.json
 esbuild.mjs
 SECURITY.md
 .probe
+media/*.py
 
 # 已经打好的包（避免把旧版本塞进新版本里）
 *.vsix

@@ -1,0 +1,55 @@
+name: Publish
+
+# 发布到 VS Code Marketplace，使用 Trusted Publishing（OIDC）——
+# 不需要 PAT、不需要 Azure DevOps 组织、仓库里也不存任何密钥。
+#
+# 前置：在 https://marketplace.visualstudio.com/manage → 你的发布者 → Trusted Publishing
+# 建一条策略，指向本仓库和本文件名（publish.yml）。
+#
+# 触发方式：
+#   - 推一个 v* 标签（例如 v0.12.1）
+#   - 或在 Actions 页面手动 Run workflow
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+# 同一时间只允许一次发布，避免两个版本抢市场
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      # OIDC：向 GitHub 要一个短期身份令牌，用它去换 Marketplace 凭据（必需）
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 类型检查
+        run: pnpm run typecheck
+
+      - name: 跑测试
+        run: pnpm run test:serial
+
+      - name: 发布到 VS Code Marketplace
+        # --oidc        Trusted Publishing（不需要 PAT）
+        # --skip-duplicate  版本已存在时不报错（方便重跑）
+        run: pnpm exec vsce publish --oidc --no-dependencies --skip-duplicate
