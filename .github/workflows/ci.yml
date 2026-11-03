@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    # 测试会真的起本地 FTP / SFTP 服务器，Windows 和开发机一致，最稳
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 类型检查
+        run: pnpm run typecheck
+
+      - name: 构建插件
+        run: pnpm run build
+
+      - name: 跑测试
+        run: pnpm test
+
+      - name: 打包（确认能产出 vsix）
+        run: pnpm run package

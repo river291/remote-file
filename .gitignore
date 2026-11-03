@@ -1,0 +1,27 @@
+# 依赖与构建产物
+node_modules/
+dist/
+out/
+out-test/
+*.tsbuildinfo
+
+# 打好的扩展包
+*.vsix
+
+# 测试产生的临时目录与日志
+.tmp-tests/
+*.log
+.probe
+
+# 包管理器缓存
+.pnpm-store/
+
+# 本地服务器配置（里面是明文密码，绝不提交）
+.vscode/sftp.json
+.vscode/sftp.yml
+.vscode/sftp.yaml
+
+# 编辑器 / 系统杂项
+.DS_Store
+Thumbs.db
+desktop.ini

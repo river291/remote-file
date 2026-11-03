@@ -1,0 +1,540 @@
+{
+  "name": "remote-file",
+  "displayName": "Remote File - FTP/SFTP 部署",
+  "description": "读取工作区 .vscode/sftp.json 配置，通过 SFTP/FTP 浏览远程文件、保存自动上传、目录映射、删除同步。",
+  "version": "0.12.0",
+  "publisher": "local",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/river291/remote-file.git"
+  },
+  "homepage": "https://github.com/river291/remote-file#readme",
+  "bugs": {
+    "url": "https://github.com/river291/remote-file/issues"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ftp",
+    "sftp",
+    "ftps",
+    "deploy",
+    "upload",
+    "sync"
+  ],
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "插件会连接远程服务器并读写远程文件，需要信任工作区。"
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "插件需要访问本地文件系统。"
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "remoteFile.refresh",
+        "title": "刷新远程文件列表",
+        "category": "Remote File",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "remoteFile.reconnect",
+        "title": "重新连接服务器",
+        "category": "Remote File",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "remoteFile.uploadCurrentFile",
+        "title": "上传当前文件到远程",
+        "category": "Remote File",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "remoteFile.uploadPath",
+        "title": "上传到远程服务器",
+        "category": "Remote File"
+      },
+      {
+        "command": "remoteFile.uploadAll",
+        "title": "上传整个项目到远程",
+        "category": "Remote File",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "remoteFile.downloadAll",
+        "title": "从远程下载整个项目（覆盖本地）",
+        "category": "Remote File",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "remoteFile.selectServer",
+        "title": "切换服务器",
+        "category": "Remote File",
+        "icon": "$(server)"
+      },
+      {
+        "command": "remoteFile.downloadPath",
+        "title": "下载到本地",
+        "category": "Remote File",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "remoteFile.deleteRemote",
+        "title": "删除远程文件/文件夹",
+        "category": "Remote File",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "remoteFile.newRemoteFolder",
+        "title": "新建远程文件夹",
+        "category": "Remote File",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "remoteFile.openRemoteFile",
+        "title": "查看远程文件",
+        "category": "Remote File"
+      },
+      {
+        "command": "remoteFile.diffWithLocal",
+        "title": "与本地文件对比",
+        "category": "Remote File",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "remoteFile.revealLocal",
+        "title": "在本地打开对应文件",
+        "category": "Remote File",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "remoteFile.openConfig",
+        "title": "打开配置文件 sftp.json",
+        "category": "Remote File",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "remoteFile.initConfig",
+        "title": "配置向导：填服务器信息并生成配置",
+        "category": "Remote File"
+      },
+      {
+        "command": "remoteFile.syncNow",
+        "title": "与远程增量同步（只传变化的）",
+        "category": "Remote File",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "remoteFile.showOutput",
+        "title": "显示运行日志",
+        "category": "Remote File",
+        "icon": "$(output)"
+      },
+      {
+        "command": "remoteFile.ignoreFolder",
+        "title": "忽略该目录",
+        "category": "Remote File",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "remoteFile.ignoreFile",
+        "title": "忽略该文件",
+        "category": "Remote File",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "remoteFile.ignoreFileType",
+        "title": "忽略该类型文件",
+        "category": "Remote File",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "remoteFile.removeIgnoreRule",
+        "title": "从上传忽略规则中移除",
+        "category": "Remote File",
+        "icon": "$(history)"
+      },
+      {
+        "command": "remoteFile.showProtocolLog",
+        "title": "显示协议细节日志（排查传输问题）",
+        "category": "Remote File",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "remoteFile.copyRemotePath",
+        "title": "复制远程路径",
+        "category": "Remote File"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "remoteFile.uploadCurrentFile",
+        "key": "ctrl+alt+u",
+        "mac": "cmd+alt+u",
+        "when": "editorTextFocus"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "remoteFile",
+          "title": "远程文件",
+          "icon": "media/remote.svg"
+        }
+      ]
+    },
+    "views": {
+      "remoteFile": [
+        {
+          "id": "remoteFile.explorer",
+          "name": "远程文件",
+          "icon": "media/remote.svg",
+          "contextualTitle": "远程文件"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "remoteFile.explorer",
+        "contents": "还没有找到配置文件。\n\n用配置向导一步步填服务器信息（协议、端口、账号、目录），几秒钟就能连上。\n[配置向导](command:remoteFile.initConfig)\n[打开配置文件](command:remoteFile.openConfig)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "remoteFile.refresh",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "remoteFile.reconnect",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "remoteFile.uploadCurrentFile",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "remoteFile.uploadAll",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@4"
+        },
+        {
+          "command": "remoteFile.downloadAll",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@5"
+        },
+        {
+          "command": "remoteFile.syncNow",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@6"
+        },
+        {
+          "command": "remoteFile.selectServer",
+          "when": "view == remoteFile.explorer",
+          "group": "navigation@7"
+        },
+        {
+          "command": "remoteFile.openConfig",
+          "when": "view == remoteFile.explorer",
+          "group": "9_help@1"
+        },
+        {
+          "command": "remoteFile.showOutput",
+          "when": "view == remoteFile.explorer",
+          "group": "9_help@2"
+        },
+        {
+          "command": "remoteFile.showProtocolLog",
+          "when": "view == remoteFile.explorer",
+          "group": "9_help@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "remoteFile.openRemoteFile",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.file/",
+          "group": "inline@1"
+        },
+        {
+          "command": "remoteFile.openRemoteFile",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.file/",
+          "group": "0_view@1"
+        },
+        {
+          "command": "remoteFile.revealLocal",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.file/",
+          "group": "0_view@2"
+        },
+        {
+          "command": "remoteFile.diffWithLocal",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.file/",
+          "group": "0_view@3"
+        },
+        {
+          "command": "remoteFile.downloadPath",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.(file|folder|root)/",
+          "group": "1_transfer@1"
+        },
+        {
+          "command": "remoteFile.uploadPath",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.(folder|root)/",
+          "group": "1_transfer@2"
+        },
+        {
+          "command": "remoteFile.newRemoteFolder",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.(folder|root)/",
+          "group": "2_edit@1"
+        },
+        {
+          "command": "remoteFile.copyRemotePath",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.(file|folder|root)/",
+          "group": "2_edit@2"
+        },
+        {
+          "command": "remoteFile.deleteRemote",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.(file|folder)/",
+          "group": "3_danger@1"
+        },
+        {
+          "command": "remoteFile.refresh",
+          "when": "view == remoteFile.explorer && viewItem =~ /remoteFile\\.(folder|root)/",
+          "group": "navigation@1"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "remoteFile.uploadPath",
+          "when": "resourceScheme == file",
+          "group": "remoteFile@1"
+        },
+        {
+          "command": "remoteFile.ignoreFolder",
+          "when": "resourceScheme == file && explorerResourceIsFolder && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@2"
+        },
+        {
+          "command": "remoteFile.ignoreFile",
+          "when": "resourceScheme == file && !explorerResourceIsFolder && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@2"
+        },
+        {
+          "command": "remoteFile.ignoreFileType",
+          "when": "resourceScheme == file && !explorerResourceIsFolder && resourceExtname != '' && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@3"
+        },
+        {
+          "command": "remoteFile.removeIgnoreRule",
+          "when": "resourceScheme == file && resourcePath in remoteFile.ignoredPaths",
+          "group": "remoteFile@4"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "remoteFile.uploadCurrentFile",
+          "when": "resourceScheme == file",
+          "group": "remoteFile@1"
+        },
+        {
+          "command": "remoteFile.ignoreFile",
+          "when": "resourceScheme == file && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@2"
+        },
+        {
+          "command": "remoteFile.ignoreFileType",
+          "when": "resourceScheme == file && resourceExtname != '' && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@3"
+        },
+        {
+          "command": "remoteFile.removeIgnoreRule",
+          "when": "resourceScheme == file && resourcePath in remoteFile.ignoredPaths",
+          "group": "remoteFile@4"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "remoteFile.ignoreFile",
+          "when": "resourceScheme == file && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@1"
+        },
+        {
+          "command": "remoteFile.ignoreFileType",
+          "when": "resourceScheme == file && resourceExtname != '' && resourcePath not in remoteFile.ignoredPaths",
+          "group": "remoteFile@2"
+        },
+        {
+          "command": "remoteFile.removeIgnoreRule",
+          "when": "resourceScheme == file && resourcePath in remoteFile.ignoredPaths",
+          "group": "remoteFile@3"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "remoteFile.openRemoteFile",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Remote File",
+      "properties": {
+        "remoteFile.configFile": {
+          "type": "string",
+          "default": ".vscode/sftp.json",
+          "scope": "resource",
+          "description": "配置文件路径（相对于工作区根目录）。支持 JSONC（带 // 注释的 JSON）和 YAML：扩展名是 .yml / .yaml 就按 YAML 解析。把文件改名成 .vscode/sftp.yml 即可切换，不用改这里 —— 找不到指定文件时会自动尝试同名的其它扩展名。"
+        },
+        "remoteFile.uploadOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "保存文件时自动上传。配置文件里的 uploadOnSave 优先级更高。"
+        },
+        "remoteFile.deleteOnLocalDelete": {
+          "type": "boolean",
+          "default": false,
+          "description": "本地删除文件时同步删除远程文件。配置文件里的 deleteOnLocalDelete 优先级更高。危险操作，默认关闭。"
+        },
+        "remoteFile.uploadOnCreate": {
+          "type": "boolean",
+          "default": true,
+          "description": "本地新建文件时自动上传。"
+        },
+        "remoteFile.uploadOnlyWhenChanged": {
+          "type": "boolean",
+          "default": true,
+          "description": "文件内容与上次成功上传的一模一样时跳过上传（避免按了 Ctrl+S 但没改动也白跑一次网络）。只影响保存/新建触发的自动上传；Ctrl+Alt+U、右键上传等显式命令始终强制上传。配置文件里的 uploadOnlyWhenChanged 优先级更高。"
+        },
+        "remoteFile.syncOnStartup": {
+          "type": "string",
+          "enum": [
+            "off",
+            "ask",
+            "auto"
+          ],
+          "default": "off",
+          "enumDescriptions": [
+            "不自动同步（默认）。想同步时用「与远程增量同步」命令",
+            "打开项目时如果检测到变化，弹一次确认再同步",
+            "打开项目时自动同步，不询问"
+          ],
+          "description": "打开项目时是否自动补同步。用来兜住「VSCode 没开的时候文件被别的工具改过」的情况：启动时会对比本地内容和同步账本，把改动/新增的文件传上去；删除本地文件是否连带删远程，仍由 deleteOnLocalDelete 控制。第一次启用只建立基线、不传输。"
+        },
+        "remoteFile.confirmDelete": {
+          "type": "boolean",
+          "default": true,
+          "description": "删除远程文件/文件夹前弹窗确认。"
+        },
+        "remoteFile.connectTimeout": {
+          "type": "number",
+          "default": 20000,
+          "description": "连接超时时间（毫秒）。"
+        },
+        "remoteFile.concurrency": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 16,
+          "description": "同一条连接上允许同时进行的远程操作数。0 = 自动（SFTP 用 4，FTP 用 1）。注意这不是连接数：插件始终只用一条连接。FTP 的控制连接协议上不允许并发传输，调大一般没有收益；SFTP 走 SSH 多路复用，调大能明显加快批量上传和批量列目录。"
+        },
+        "remoteFile.expandDepth": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 3,
+          "description": "远程文件列表默认展开到第几层。0 = 全部折叠，1 = 展开同步根（默认），2 = 再展开第一层目录，以此类推。注意：每个自动展开的目录都会立刻向服务器发一次列目录请求，数值越大打开面板时请求越多。"
+        },
+        "remoteFile.ftpActiveCommand": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "port",
+            "eprt"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "先试 EPRT，被服务器拒绝再退回 PORT，并记住结论（默认）",
+            "只用 PORT。老路由器的 FTP ALG 往往只认 PORT —— 主动模式时通时不通可以试这个",
+            "只用 EPRT"
+          ],
+          "description": "主动模式下用哪条命令把回连地址告诉服务器。被动模式不受影响。"
+        },
+        "remoteFile.openMode": {
+          "type": "string",
+          "enum": [
+            "both",
+            "remote",
+            "diff"
+          ],
+          "default": "both",
+          "enumDescriptions": [
+            "分栏显示：左边远程（只读预览，标签带「(远程)」前缀），右边本地对应文件（可直接编辑）",
+            "只打开远程那一份",
+            "用差异视图对比远程和本地"
+          ],
+          "description": "点击远程文件时的打开方式。"
+        },
+        "remoteFile.ignore": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".git",
+            ".svn",
+            ".hg",
+            ".vscode",
+            ".idea",
+            "node_modules",
+            "**/.DS_Store",
+            "**/Thumbs.db"
+          ],
+          "description": "不上传的路径规则（glob 语法）。配置文件里的 ignore 会与这里合并。"
+        },
+        "remoteFile.remoteCharset": {
+          "type": "string",
+          "default": "utf8",
+          "description": "远程目录名编码。Windows 上遇到中文乱码的 FTP 服务器时可尝试 gbk。"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node esbuild.mjs --tests && node --test-timeout=60000 --test \"out-test/*.test.js\"",
+    "package": "node esbuild.mjs && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "@types/ssh2-sftp-client": "^9.0.4",
+    "@types/vscode": "1.95.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.2",
+    "ftp-srv": "^4.6.3",
+    "iconv-lite": "^0.6.3",
+    "js-yaml": "^4.1.0",
+    "selfsigned": "^5.5.0",
+    "ssh2": "^1.17.0",
+    "ssh2-sftp-client": "^12.1.1",
+    "typescript": "^5.7.2"
+  }
+}

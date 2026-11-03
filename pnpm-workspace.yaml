@@ -1,0 +1,18 @@
+# pnpm 配置。
+#
+# nodeLinker: hoisted —— 使用和 npm 一样的扁平 node_modules 结构。
+#   本项目的构建环境不允许 pnpm 以管道方式 fork 子进程，隔离式布局的软链接因此
+#   常常链接不全；扁平布局更稳，插件最后是打成单文件 bundle 的，不受影响。
+#
+# allowBuilds 全部关掉：这些安装脚本对功能没有影响
+#   - esbuild 的平台二进制由可选依赖提供，不需要 postinstall
+#   - ssh2 的 cpu-features 是可选的加速，缺失时自动降级为纯 JS
+#   - 其余是签名/原生依赖，本地开发和测试用不到
+nodeLinker: hoisted
+allowBuilds:
+  esbuild: false
+  '@vscode/vsce-sign': false
+  cpu-features: false
+  dtrace-provider: false
+  keytar: false
+  ssh2: false

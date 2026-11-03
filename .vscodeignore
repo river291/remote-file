@@ -1,0 +1,38 @@
+# 只把「运行插件真正需要的东西」打进 .vsix：dist/、media/、package.json、README、LICENSE。
+# 其余全是开发期的产物或缓存。
+
+# 开发与测试源码
+src/**
+test/**
+scripts/**
+
+# 构建中间产物
+out/**
+out-test/**
+
+# 测试跑出来的临时目录与日志
+.tmp-tests/**
+*.log
+
+# 包管理器的东西（依赖已经被 esbuild 打进 dist/extension.js 了）
+node_modules/**
+.pnpm-store/**
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# 开发配置与仓库文件
+.vscode/**
+.github/**
+.gitignore
+.gitattributes
+tsconfig.json
+esbuild.mjs
+SECURITY.md
+.probe
+
+# 已经打好的包（避免把旧版本塞进新版本里）
+*.vsix
+
+# 源码映射与 TypeScript 源码（排查问题用不上，白白占体积）
+**/*.map
+**/*.ts
