@@ -520,6 +520,7 @@
     "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit",
     "test": "node esbuild.mjs --tests && node --test-timeout=60000 --test \"out-test/*.test.js\"",
+    "test:serial": "node esbuild.mjs --tests && node --test-timeout=60000 --test-concurrency=1 --test \"out-test/*.test.js\"",
     "package": "node esbuild.mjs && vsce package --no-dependencies"
   },
   "devDependencies": {

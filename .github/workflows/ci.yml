@@ -35,7 +35,9 @@ jobs:
         run: pnpm run build
 
       - name: 跑测试
-        run: pnpm test
+        # 串行执行：测试会真的起 FTP / SFTP 服务器并读写磁盘，
+        # 多个测试文件并行跑（每个一个进程）会互相干扰、偶发假失败
+        run: pnpm run test:serial
 
       - name: 打包（确认能产出 vsix）
         run: pnpm run package

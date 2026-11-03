@@ -888,6 +888,7 @@ pnpm run build       # 打包成 dist/extension.js
 pnpm run watch       # 监听源码变化自动重新打包
 pnpm run typecheck   # 类型检查
 pnpm test            # 编译并运行全部测试
+pnpm run test:serial # 同上，但串行跑（CI 用这个，见下）
 pnpm run package     # 生成 .vsix
 ```
 
@@ -904,8 +905,12 @@ pnpm run package     # 生成 .vsix
 ### 持续集成
 
 `.github/workflows/ci.yml` 在 `windows-latest` 上跑
-`typecheck → build → test → package`。选 Windows 是因为测试会真的起本地
+`typecheck → build → test:serial → package`。选 Windows 是因为测试会真的起本地
 FTP / SFTP 服务器，和开发机环境一致最稳。
+
+测试在 CI 里**串行执行**（`test:serial`）：多个测试文件并行跑时，它们会同时起服务器、
+同时往 `.tmp-tests` 里读写，实测会出现偶发假失败（同一处代码上一轮过、下一轮挂）。
+本地用 `pnpm test`（并行，快）就够，CI 用串行换确定性。
 
 ### 测试覆盖了什么
 
